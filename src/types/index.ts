@@ -19,5 +19,6 @@ export interface CoffeeShop {
   styleId?: string;
   styleName?: string;
   imageUrl?: string;
+  imageUrls?: string[]; // Added array of image URLs for multiple images
   createdAt: Date;
 }

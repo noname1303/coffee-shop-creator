@@ -13,7 +13,7 @@ import {
   SelectValue
 } from "@/components/ui/select";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Coffee, MapPin, DollarSign, Plus, Image, PaintBucket, Check } from "lucide-react";
+import { Coffee, MapPin, DollarSign, Plus, Image, PaintBucket, Check, X, Upload, Trash } from "lucide-react";
 import { 
   Command,
   CommandEmpty,
@@ -50,8 +50,8 @@ const CoffeeShopForm: React.FC<CoffeeShopFormProps> = ({ onSuccess }) => {
   const [styles, setStyles] = useState(INITIAL_STYLES);
   const [newStyle, setNewStyle] = useState("");
   const [isCreatingStyle, setIsCreatingStyle] = useState(false);
-  const [image, setImage] = useState<File | null>(null);
-  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [images, setImages] = useState<File[]>([]);
+  const [imagePreviews, setImagePreviews] = useState<string[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [openStylePopover, setOpenStylePopover] = useState(false);
   
@@ -59,18 +59,28 @@ const CoffeeShopForm: React.FC<CoffeeShopFormProps> = ({ onSuccess }) => {
   const [nameError, setNameError] = useState("");
   const [addressError, setAddressError] = useState("");
   
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      const selectedFile = e.target.files[0];
-      setImage(selectedFile);
+  const handleImagesChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files.length > 0) {
+      const selectedFiles = Array.from(e.target.files);
+      setImages((prevImages) => [...prevImages, ...selectedFiles]);
       
-      // Create a preview
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        setImagePreview(event.target?.result as string);
-      };
-      reader.readAsDataURL(selectedFile);
+      // Create previews for all selected files
+      selectedFiles.forEach(file => {
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          setImagePreviews((prevPreviews) => [
+            ...prevPreviews,
+            event.target?.result as string
+          ]);
+        };
+        reader.readAsDataURL(file);
+      });
     }
+  };
+
+  const removeImage = (index: number) => {
+    setImages(images.filter((_, i) => i !== index));
+    setImagePreviews(imagePreviews.filter((_, i) => i !== index));
   };
 
   const handleCreateStyle = () => {
@@ -120,14 +130,14 @@ const CoffeeShopForm: React.FC<CoffeeShopFormProps> = ({ onSuccess }) => {
     setIsSubmitting(true);
     
     try {
-      // When Supabase is connected, we'll upload the image and save to database
+      // When Supabase is connected, we'll upload the images and save to database
       addCoffeeShop({
         name: name.trim(),
         address: address.trim(),
         priceRange,
         styleId,
         styleName,
-        // imageUrl will be added after Supabase integration
+        // imageUrls will be added after Supabase integration
       });
       
       // Clear form
@@ -136,8 +146,8 @@ const CoffeeShopForm: React.FC<CoffeeShopFormProps> = ({ onSuccess }) => {
       setPriceRange(PriceRange.MODERATE);
       setStyleId("");
       setStyleName("");
-      setImage(null);
-      setImagePreview(null);
+      setImages([]);
+      setImagePreviews([]);
       onSuccess();
     } catch (error) {
       console.error("Error adding coffee shop:", error);
@@ -291,68 +301,63 @@ const CoffeeShopForm: React.FC<CoffeeShopFormProps> = ({ onSuccess }) => {
           </div>
           
           <div className="space-y-2">
-            <Label htmlFor="image" className="flex items-center gap-1.5">
+            <Label htmlFor="images" className="flex items-center gap-1.5">
               <Image className="h-3.5 w-3.5" />
-              Shop Image
+              Shop Images
             </Label>
-            <div className="flex flex-col items-center justify-center">
-              {imagePreview ? (
-                <div className="relative w-full h-40 mb-4">
-                  <img
-                    src={imagePreview}
-                    alt="Preview"
-                    className="w-full h-full object-cover rounded-md"
-                  />
-                  <Button
-                    type="button"
-                    variant="destructive"
-                    size="icon"
-                    className="absolute top-2 right-2 h-8 w-8 rounded-full"
-                    onClick={() => {
-                      setImage(null);
-                      setImagePreview(null);
-                    }}
-                  >
-                    <span className="sr-only">Remove image</span>
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      className="h-4 w-4"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
+            
+            {/* Image Previews */}
+            {imagePreviews.length > 0 && (
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-4">
+                {imagePreviews.map((preview, index) => (
+                  <div key={index} className="relative aspect-square rounded-md overflow-hidden border border-border">
+                    <img
+                      src={preview}
+                      alt={`Preview ${index + 1}`}
+                      className="w-full h-full object-cover"
+                    />
+                    <Button
+                      type="button"
+                      variant="destructive"
+                      size="icon"
+                      className="absolute top-2 right-2 h-8 w-8 rounded-full"
+                      onClick={() => removeImage(index)}
                     >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M6 18L18 6M6 6l12 12"
-                      />
-                    </svg>
-                  </Button>
-                </div>
-              ) : (
-                <div className="w-full">
-                  <div className="flex justify-center items-center border-2 border-dashed border-border rounded-md h-40 bg-background/50 cursor-pointer hover:bg-background/80 transition-colors"
-                       onClick={() => document.getElementById('image-upload')?.click()}>
-                    <div className="text-center p-4">
-                      <Image className="h-6 w-6 mx-auto text-muted-foreground" />
-                      <p className="mt-2 text-sm text-muted-foreground">
-                        Click to upload an image
-                      </p>
-                      <p className="text-xs text-muted-foreground">
-                        PNG, JPG up to 5MB
-                      </p>
-                    </div>
+                      <span className="sr-only">Remove image</span>
+                      <Trash className="h-4 w-4" />
+                    </Button>
                   </div>
-                  <input
-                    id="image-upload"
-                    type="file"
-                    accept="image/*"
-                    className="hidden"
-                    onChange={handleImageChange}
-                  />
+                ))}
+              </div>
+            )}
+            
+            {/* Upload Button */}
+            <div className="w-full">
+              <div 
+                className="flex justify-center items-center border-2 border-dashed border-border rounded-md h-40 bg-background/50 cursor-pointer hover:bg-background/80 transition-colors"
+                onClick={() => document.getElementById('image-upload')?.click()}
+              >
+                <div className="text-center p-4">
+                  <Upload className="h-6 w-6 mx-auto text-muted-foreground" />
+                  <p className="mt-2 text-sm text-muted-foreground">
+                    Click to upload images
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    PNG, JPG up to 5MB each
+                  </p>
+                  <p className="text-xs font-medium mt-2">
+                    {images.length} {images.length === 1 ? 'image' : 'images'} selected
+                  </p>
                 </div>
-              )}
+              </div>
+              <input
+                id="image-upload"
+                type="file"
+                accept="image/*"
+                multiple
+                className="hidden"
+                onChange={handleImagesChange}
+              />
             </div>
           </div>
           

@@ -12,6 +12,10 @@ const initialCoffeeShops: CoffeeShop[] = [
     styleId: "1",
     styleName: "Modern",
     imageUrl: "https://images.unsplash.com/photo-1554118811-1e0d58224f24?q=80&w=2940&auto=format&fit=crop",
+    imageUrls: [
+      "https://images.unsplash.com/photo-1554118811-1e0d58224f24?q=80&w=2940&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1559305616-3f99cd43e353?q=80&w=2940&auto=format&fit=crop"
+    ],
     createdAt: new Date("2023-01-15")
   },
   {
@@ -22,6 +26,10 @@ const initialCoffeeShops: CoffeeShop[] = [
     styleId: "4",
     styleName: "Cozy",
     imageUrl: "https://images.unsplash.com/photo-1445116572660-236099ec97a0?q=80&w=2071&auto=format&fit=crop",
+    imageUrls: [
+      "https://images.unsplash.com/photo-1445116572660-236099ec97a0?q=80&w=2071&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?q=80&w=1978&auto=format&fit=crop"
+    ],
     createdAt: new Date("2023-02-20")
   }
 ];
@@ -91,7 +99,6 @@ export const deleteCoffeeShop = (id: string): void => {
 };
 
 // When Supabase is connected, we'll add:
-// 1. Functions to upload images to S3/Supabase storage
+// 1. Functions to upload multiple images to S3/Supabase storage
 // 2. Functions to save/retrieve coffee shop data from Supabase
 // 3. Functions to manage coffee shop styles
-
