@@ -1,5 +1,5 @@
 
-import { CoffeeShop, PriceRange } from "@/types";
+import { CoffeeShop, PriceRange, CoffeeShopStyle } from "@/types";
 import { toast } from "sonner";
 
 // Demo data for initial load
@@ -11,6 +11,7 @@ const initialCoffeeShops: CoffeeShop[] = [
     priceRange: PriceRange.MODERATE,
     styleId: "1",
     styleName: "Modern",
+    styles: [{ id: "1", name: "Modern" }], // New multiple styles field
     imageUrl: "https://images.unsplash.com/photo-1554118811-1e0d58224f24?q=80&w=2940&auto=format&fit=crop",
     imageUrls: [
       "https://images.unsplash.com/photo-1554118811-1e0d58224f24?q=80&w=2940&auto=format&fit=crop",
@@ -25,6 +26,7 @@ const initialCoffeeShops: CoffeeShop[] = [
     priceRange: PriceRange.EXPENSIVE,
     styleId: "4",
     styleName: "Cozy",
+    styles: [{ id: "4", name: "Cozy" }, { id: "2", name: "Vintage" }], // New multiple styles field
     imageUrl: "https://images.unsplash.com/photo-1445116572660-236099ec97a0?q=80&w=2071&auto=format&fit=crop",
     imageUrls: [
       "https://images.unsplash.com/photo-1445116572660-236099ec97a0?q=80&w=2071&auto=format&fit=crop",
@@ -64,9 +66,21 @@ export const getCoffeeShops = (): CoffeeShop[] => {
 export const addCoffeeShop = (shop: Omit<CoffeeShop, "id" | "createdAt">): CoffeeShop => {
   const shops = getCoffeeShops();
   
+  // Maintain backward compatibility
+  let styleId: string | undefined = undefined;
+  let styleName: string | undefined = undefined;
+  
+  // If we have styles, set the first one as the primary one for backward compatibility
+  if (shop.styles && shop.styles.length > 0) {
+    styleId = shop.styles[0].id;
+    styleName = shop.styles[0].name;
+  }
+  
   const newShop: CoffeeShop = {
     ...shop,
     id: Math.random().toString(36).substring(2, 9),
+    styleId,
+    styleName,
     createdAt: new Date()
   };
   

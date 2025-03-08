@@ -1,6 +1,6 @@
 
 import React, { useState } from "react";
-import { PriceRange } from "@/types";
+import { PriceRange, CoffeeShopStyle } from "@/types";
 import { addCoffeeShop } from "@/lib/coffeeShops";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -45,8 +45,7 @@ const CoffeeShopForm: React.FC<CoffeeShopFormProps> = ({ onSuccess }) => {
   const [name, setName] = useState("");
   const [address, setAddress] = useState("");
   const [priceRange, setPriceRange] = useState<PriceRange>(PriceRange.MODERATE);
-  const [styleId, setStyleId] = useState<string>("");
-  const [styleName, setStyleName] = useState<string>("");
+  const [selectedStyles, setSelectedStyles] = useState<CoffeeShopStyle[]>([]);
   const [styles, setStyles] = useState(INITIAL_STYLES);
   const [newStyle, setNewStyle] = useState("");
   const [isCreatingStyle, setIsCreatingStyle] = useState(false);
@@ -91,18 +90,23 @@ const CoffeeShopForm: React.FC<CoffeeShopFormProps> = ({ onSuccess }) => {
     const createdStyle = { id: tempId, name: newStyle.trim() };
     
     setStyles([...styles, createdStyle]);
-    setStyleId(tempId);
-    setStyleName(newStyle.trim());
+    // Add to selected styles too
+    setSelectedStyles([...selectedStyles, createdStyle]);
     setNewStyle("");
     setIsCreatingStyle(false);
-    setOpenStylePopover(false);
     toast.success(`Added new style: ${newStyle.trim()}`);
   };
 
-  const handleSelectStyle = (id: string, name: string) => {
-    setStyleId(id);
-    setStyleName(name);
-    setOpenStylePopover(false);
+  const handleToggleStyle = (style: CoffeeShopStyle) => {
+    const isSelected = selectedStyles.some(s => s.id === style.id);
+    
+    if (isSelected) {
+      // Remove style if already selected
+      setSelectedStyles(selectedStyles.filter(s => s.id !== style.id));
+    } else {
+      // Add style if not already selected
+      setSelectedStyles([...selectedStyles, style]);
+    }
   };
   
   const handleSubmit = (e: React.FormEvent) => {
@@ -135,8 +139,7 @@ const CoffeeShopForm: React.FC<CoffeeShopFormProps> = ({ onSuccess }) => {
         name: name.trim(),
         address: address.trim(),
         priceRange,
-        styleId,
-        styleName,
+        styles: selectedStyles,
         // imageUrls will be added after Supabase integration
       });
       
@@ -144,8 +147,7 @@ const CoffeeShopForm: React.FC<CoffeeShopFormProps> = ({ onSuccess }) => {
       setName("");
       setAddress("");
       setPriceRange(PriceRange.MODERATE);
-      setStyleId("");
-      setStyleName("");
+      setSelectedStyles([]);
       setImages([]);
       setImagePreviews([]);
       onSuccess();
@@ -223,16 +225,18 @@ const CoffeeShopForm: React.FC<CoffeeShopFormProps> = ({ onSuccess }) => {
           <div className="space-y-2">
             <Label htmlFor="style" className="flex items-center gap-1.5">
               <PaintBucket className="h-3.5 w-3.5" />
-              Shop Style
+              Shop Styles
             </Label>
             <Popover open={openStylePopover} onOpenChange={setOpenStylePopover}>
               <PopoverTrigger asChild>
                 <Button
                   variant="outline"
                   role="combobox"
-                  className={`w-full justify-between glass-input ${!styleName ? 'text-muted-foreground' : ''}`}
+                  className={`w-full justify-between glass-input ${selectedStyles.length === 0 ? 'text-muted-foreground' : ''}`}
                 >
-                  {styleName || "Select a style..."}
+                  {selectedStyles.length === 0 
+                    ? "Select styles..." 
+                    : `${selectedStyles.length} style${selectedStyles.length > 1 ? 's' : ''} selected`}
                   <DollarSign className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                 </Button>
               </PopoverTrigger>
@@ -277,14 +281,18 @@ const CoffeeShopForm: React.FC<CoffeeShopFormProps> = ({ onSuccess }) => {
                         <CommandItem
                           key={style.id}
                           value={style.name}
-                          onSelect={() => handleSelectStyle(style.id, style.name)}
+                          onSelect={() => handleToggleStyle(style)}
                         >
-                          <Check
-                            className={`mr-2 h-4 w-4 ${
-                              styleId === style.id ? "opacity-100" : "opacity-0"
-                            }`}
-                          />
-                          {style.name}
+                          <div className="flex items-center">
+                            <div className={`mr-2 h-4 w-4 flex items-center justify-center ${
+                              selectedStyles.some(s => s.id === style.id) 
+                                ? "text-primary" 
+                                : "opacity-0"
+                            }`}>
+                              <Check className="h-4 w-4" />
+                            </div>
+                            {style.name}
+                          </div>
                         </CommandItem>
                       ))}
                     </CommandGroup>
@@ -298,6 +306,27 @@ const CoffeeShopForm: React.FC<CoffeeShopFormProps> = ({ onSuccess }) => {
                 </Command>
               </PopoverContent>
             </Popover>
+            
+            {/* Display selected styles as badges */}
+            {selectedStyles.length > 0 && (
+              <div className="flex flex-wrap gap-2 mt-2">
+                {selectedStyles.map(style => (
+                  <div 
+                    key={style.id}
+                    className="bg-secondary text-secondary-foreground px-2 py-1 rounded-md text-xs flex items-center gap-1"
+                  >
+                    {style.name}
+                    <button 
+                      type="button" 
+                      onClick={() => handleToggleStyle(style)}
+                      className="text-secondary-foreground/70 hover:text-secondary-foreground"
+                    >
+                      <X className="h-3 w-3" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
           
           <div className="space-y-2">

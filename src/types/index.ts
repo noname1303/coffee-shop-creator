@@ -18,6 +18,7 @@ export interface CoffeeShop {
   priceRange: PriceRange;
   styleId?: string;
   styleName?: string;
+  styles?: CoffeeShopStyle[]; // Multiple styles as an array
   imageUrl?: string;
   imageUrls?: string[]; // Added array of image URLs for multiple images
   createdAt: Date;
