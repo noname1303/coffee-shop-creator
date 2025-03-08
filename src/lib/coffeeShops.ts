@@ -9,6 +9,9 @@ const initialCoffeeShops: CoffeeShop[] = [
     name: "Minimal Brew",
     address: "123 Simplicity Ave, Design District",
     priceRange: PriceRange.MODERATE,
+    styleId: "1",
+    styleName: "Modern",
+    imageUrl: "https://images.unsplash.com/photo-1554118811-1e0d58224f24?q=80&w=2940&auto=format&fit=crop",
     createdAt: new Date("2023-01-15")
   },
   {
@@ -16,6 +19,9 @@ const initialCoffeeShops: CoffeeShop[] = [
     name: "Essence Café",
     address: "456 Elegance St, Artisan Quarter",
     priceRange: PriceRange.EXPENSIVE,
+    styleId: "4",
+    styleName: "Cozy",
+    imageUrl: "https://images.unsplash.com/photo-1445116572660-236099ec97a0?q=80&w=2071&auto=format&fit=crop",
     createdAt: new Date("2023-02-20")
   }
 ];
@@ -83,3 +89,9 @@ export const deleteCoffeeShop = (id: string): void => {
     throw new Error("Failed to delete coffee shop");
   }
 };
+
+// When Supabase is connected, we'll add:
+// 1. Functions to upload images to S3/Supabase storage
+// 2. Functions to save/retrieve coffee shop data from Supabase
+// 3. Functions to manage coffee shop styles
+

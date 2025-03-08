@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Coffee, MapPin, DollarSign, Trash2, Store } from "lucide-react";
+import { Coffee, MapPin, DollarSign, Trash2, Store, PaintBucket } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -63,9 +63,18 @@ const CoffeeShopList: React.FC<CoffeeShopListProps> = ({ shops, onDelete }) => {
       {shops.map((shop, index) => (
         <Card 
           key={shop.id} 
-          className="glass-card animate-slide-up hover:shadow-md transition-all"
+          className="glass-card animate-slide-up overflow-hidden hover:shadow-md transition-all"
           style={{ animationDelay: `${index * 50}ms` }}
         >
+          {shop.imageUrl && (
+            <div className="h-36 overflow-hidden">
+              <img 
+                src={shop.imageUrl} 
+                alt={shop.name} 
+                className="w-full h-full object-cover transition-transform hover:scale-105"
+              />
+            </div>
+          )}
           <CardHeader className="pb-3">
             <div className="flex justify-between items-start">
               <Badge className="mb-2 bg-primary/10 text-primary hover:bg-primary/20 transition-colors">
@@ -112,6 +121,12 @@ const CoffeeShopList: React.FC<CoffeeShopListProps> = ({ shops, onDelete }) => {
               <MapPin className="h-4 w-4 text-muted-foreground mt-0.5 flex-shrink-0" />
               <p className="text-muted-foreground">{shop.address}</p>
             </div>
+            {shop.styleName && (
+              <div className="flex items-start gap-2 text-sm mt-2">
+                <PaintBucket className="h-4 w-4 text-muted-foreground mt-0.5 flex-shrink-0" />
+                <p className="text-muted-foreground">Style: {shop.styleName}</p>
+              </div>
+            )}
           </CardContent>
           <CardFooter className="pt-1">
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
