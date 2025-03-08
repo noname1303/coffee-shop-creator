@@ -13,7 +13,7 @@ import {
   SelectValue
 } from "@/components/ui/select";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Coffee, MapPin, DollarSign, Plus, Image, PaintBucket } from "lucide-react";
+import { Coffee, MapPin, DollarSign, Plus, Image, PaintBucket, Check } from "lucide-react";
 import { 
   Command,
   CommandEmpty,
